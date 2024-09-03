@@ -4,7 +4,7 @@
 {% block title%} GreatKart | Cart {% endblock %}
 {% block content %}
 
-<section class="section-content padding-y bg" style="height: 75vh">
+<section class="section-content padding-y bg" style="min-height: 75vh">
     <div class="container">
         <!-- ============================ COMPONENT 1 ================================= -->
 
@@ -14,7 +14,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title mb-4">Billing Address</h5>
-                        <form action="" method="POST">
+                        <form action="{% url 'orders:place_order' %}" method="POST">
                             {% csrf_token %}
                             <div class="form-row">
                                 <div class="col form-group">
@@ -100,7 +100,7 @@
                                                     {% if cart_item.variations.all %}
                                                     {% for item in cart_item.variations.all %}
                                                     {{ item.variation_category|capfirst }} :
-                                                    {{item.variation_value|capfirst }} <br>
+                                                    {{ item.variation_value|capfirst }} <br>
                                                     {% endfor %}
                                                     {% endif %}
                                                 </p>
@@ -126,7 +126,7 @@
                         <button type="submit" name="submit" class="btn btn-primary btn-block">Place Order</button>
                         <a href="{% url 'store:store' %}" class="btn btn-light btn-block">Continue Shopping</a>
                         </form>
-
+                        
                     </div>
                 </div>
 

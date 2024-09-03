@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'accounts',
     'store',
     'carts',
+    'orders',
 ]
 
 MIDDLEWARE = [
@@ -139,3 +140,6 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'siddharthsarvaiya56@gmail.com'
 EMAIL_HOST_PASSWORD = 'detr cizi aaoy dbtg'
 EMAIL_USE_TLS = True
+
+# ======== paypal ===========
+SECURE_CROSS_ORIGIN_OPENER_POLICY='same-origin-allow-popups'
