@@ -1,12 +1,81 @@
 from django.shortcuts import render, redirect
 from carts.models import CartItem
+from store.models import Product
 from .forms import OrderForm
-from .models import Order
+from .models import Order, OrderProduct
 import datetime
+import json
+from .models import Payment
+from django.http import JsonResponse
+
+# ------------email ---------
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
 
 
 def payments(request):
-    return render(request, 'orders/payments.html')
+    body = json.loads(request.body)
+    order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
+
+    # Store transaction detail inside a payment model
+    payment = Payment(
+        user = request.user,
+        payment_id = body['transID'],
+        payment_method = body['payment_method'],
+        amount_paid = order.order_total,
+        status = body['status'],
+    )
+    payment.save()
+
+    order.payment = payment
+    order.is_ordered = True
+    order.save()
+
+    # Move cart item to order product table
+    cart_item = CartItem.objects.filter(user=request.user)
+    for item in cart_item:
+        orderproduct = OrderProduct()
+        orderproduct.order_id = order.id
+        orderproduct.payment = payment
+        orderproduct.user_id = request.user.id
+        orderproduct.product_id = item.product_id
+        orderproduct.quantity = item.quantity
+        orderproduct.product_price = item.product.price
+        orderproduct.ordered = True
+        orderproduct.save()
+
+        cart_item = CartItem.objects.get(id=item.id)
+        product_variation = cart_item.variations.all()
+        orderproduct = OrderProduct.objects.get(id=orderproduct.id)
+        orderproduct.variations.set(product_variation)
+        orderproduct.save()
+
+    # Reduce the quantity of sold product
+        product = Product.objects.get(id=item.product_id)
+        product.stock -= item.quantity
+        product.save()
+        
+    # clear cart
+    CartItem.objects.filter(user=request.user).delete()
+
+    # send order received email to customer 
+    mail_subject = 'Thank you for your order!'
+    message = render_to_string('orders/order_received_email.html', {
+        'user': request.user,
+        'order': order,
+    })
+    to_email = request.user.email
+    send_email = EmailMessage(mail_subject, message, to=[to_email])
+    send_email.send()
+
+
+    # send order number and transaction id back to sendData function via json resonponse
+    data = {
+        'order_number': order.order_number,
+        'transID': payment.payment_id
+    }
+
+    return JsonResponse(data)
 
 
 def place_order(request, total=0, quantity=0):
@@ -70,3 +139,33 @@ def place_order(request, total=0, quantity=0):
     else:
         return redirect('cart:checkout')
     
+
+def order_complete(request):
+    order_number = request.GET.get('order_number')
+    transID = request.GET.get('payment_id')
+
+    try:
+        order = Order.objects.get(order_number=order_number, is_ordered=True)
+        order_products = OrderProduct.objects.filter(order_id=order.id)
+
+        subtotal = 0
+        for i in order_products:
+            subtotal += i.product_price * i.quantity
+
+        payment = Payment.objects.get(payment_id=transID)
+
+        context = {
+            'order': order,
+            'order_products': order_products,
+            'order_number': order.order_number,
+            'transID': payment.payment_id,
+            'payment': payment,
+            'subtotal': subtotal,
+
+        }
+
+        return render(request, 'orders/order_complete.html', context)
+
+    except (Payment.DoesNotExist, Order.DoesNotExist):
+        return redirect('home')
+
