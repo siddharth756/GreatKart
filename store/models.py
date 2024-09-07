@@ -1,6 +1,7 @@
 from django.db import models
 from category.models import Category
 from django.urls import reverse
+from accounts.models import Account
 
 # Create your models here.
 
@@ -48,4 +49,15 @@ class Variation(models.Model):
     def __str__(self):
         return self.variation_value
     
+
+class ProductGallery(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='store/products', max_length=255)
+
+    def __str__(self):
+        return self.product.product_name
+
+    class Meta:
+        verbose_name = "productgallary"
+        verbose_name_plural = "product gallary"
     

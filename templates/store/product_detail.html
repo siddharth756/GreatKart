@@ -9,11 +9,21 @@
 			<div class="row no-gutters">
 				<aside class="col-md-6">
 					<article class="gallery-wrap">
-						<div class="img-big-wrap">
-							<a href="{{ product.get_url }}"><img src="{{ single_product.images.url }}" /></a>
+						<div class="img-big-wrap mainImage">
+							<center>
+								<img src="{{ single_product.images.url }}" />
+							</center>
 						</div>
 						<!-- img-big-wrap.// -->
 					</article>
+					<ul class="thumb">
+						<li>
+							<a href="{{ single_product.images.url }}" target="mainImage"><img src="{{ single_product.images.url }}" alt="Product Image"></a>
+							{% for i in product_gallery %}
+							<a href="{{i.image.url}}" target="mainImage"><img src="{{i.image.url}}" alt="Product Image"></a>
+							{% endfor %}
+						</li>
+					</ul>
 					<!-- gallery-wrap .end// -->
 				</aside>
 				<main class="col-md-6 border-left">
@@ -82,6 +92,8 @@
 					<h3>Customer Reviews</h3>
 				</header>
 
+				<br>
+
 				<article class="box mb-3">
 					<div class="icontext w-100">
 						<img src="{% static './images/avatars/avatar1.jpg' %}" class="img-xs icon rounded-circle" />
@@ -108,5 +120,14 @@
 	<!-- container .//  -->
 </section>
 <!-- ========================= SECTION CONTENT END// ========================= -->
+
+<script>
+	$(document).ready(function() {
+		$('.thumb a').click(function(e) {
+			e.preventDefault();
+			$('.mainImage img').attr('src',$(this).attr('href')); 
+		})
+	})
+</script>
 
 {% endblock %}
