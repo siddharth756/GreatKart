@@ -54,4 +54,3 @@ python manage.py migrate
 python manage.py runserver
 ```
 The application should now be accessible at `http://127.0.0.1:8000/`.
-------------------------------------------------------------------------
