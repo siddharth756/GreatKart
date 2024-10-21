@@ -2,6 +2,8 @@
 
 GreatKart is an e-commerce platform built with Python and Django. It includes features like a cart system, checkout, orders, payment integration (with PayPal Sandbox), dashboard, and email authentication with tokens.
 
+<img src="https://github.com/siddharth756/GreatKart-django/blob/main/greatkart/static/images/banners/GreatKart.png" alt="GreatKart Image">
+
 ## Features
 
 - User Registration & Authentication
